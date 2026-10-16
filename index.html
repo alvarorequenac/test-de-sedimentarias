@@ -1,0 +1,609 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Test de sedimentarias</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Concepto: cuaderno de laboratorio. Cada roca es una etiqueta de muestra con las mismas 8 columnas del test.
+   Colores: tinta pizarra + azurita como acento; ocre / turquesa / musgo marcan las 3 clases (Detrítica, Química, Bioquímica). */
+:root{
+  --bg:#F1F2EE; --surface:#FFFFFF; --surface2:#E6E9E3; --ink:#1B2326; --muted:#566368; --line:#D2D7D0;
+  --accent:#1E4F7A; --accent-ink:#FFFFFF; --accent-soft:#DCE8F3;
+  --det:#9A5B14; --qui:#17707F; --bio:#4A7226;
+  --ok:#1E7A3C; --ok-soft:#DDF1E3; --bad:#B3261E; --bad-soft:#F8E1DF; --warn:#7A5200; --warn-soft:#F7EBCB;
+  --font:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1416; --surface:#172025; --surface2:#212B30; --ink:#E8EDEB; --muted:#9BA8AC; --line:#2D393F;
+    --accent:#7DB8EA; --accent-ink:#08192A; --accent-soft:#1A2C3B;
+    --det:#E3A35C; --qui:#62C4D6; --bio:#A2D06F;
+    --ok:#6FCF8D; --ok-soft:#173424; --bad:#FF9188; --bad-soft:#3A1E1D; --warn:#E8C26A; --warn-soft:#352B12; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1416; --surface:#172025; --surface2:#212B30; --ink:#E8EDEB; --muted:#9BA8AC; --line:#2D393F;
+  --accent:#7DB8EA; --accent-ink:#08192A; --accent-soft:#1A2C3B;
+  --det:#E3A35C; --qui:#62C4D6; --bio:#A2D06F;
+  --ok:#6FCF8D; --ok-soft:#173424; --bad:#FF9188; --bad-soft:#3A1E1D; --warn:#E8C26A; --warn-soft:#352B12; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1000px;margin:0 auto}
+h1,h2,h3{line-height:1.2;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+/* encabezado */
+header.top{padding:18px 0 10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+header.top .sub{font-size:.85rem;color:var(--muted)}
+.meter{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.meter b{color:var(--ink)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:6px 0 10px;border-bottom:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+nav.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 0;font-size:clamp(.72rem,3.4vw,.88rem);font-weight:600;min-width:0}
+nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+main{padding-top:18px;display:grid;gap:16px}
+/* piezas */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:.92rem;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:11px 18px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.tag::before{content:"";width:9px;height:9px;border-radius:2px;background:currentColor}
+.c-det{color:var(--det)} .c-qui{color:var(--qui)} .c-bio{color:var(--bio)}
+.label{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.notice{border-radius:8px;padding:10px 12px;font-size:.92rem;background:var(--warn-soft);color:var(--warn)}
+.notice.ok{background:var(--ok-soft);color:var(--ok)} .notice.bad{background:var(--bad-soft);color:var(--bad)} .notice.info{background:var(--accent-soft);color:var(--accent)}
+/* grilla de fichas */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.rcard{padding:0;overflow:hidden;text-align:left;display:flex;flex-direction:column;border:1px solid var(--line);background:var(--surface);border-radius:10px}
+.rcard img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface2)}
+.rcard .meta{padding:10px 12px 12px;display:grid;gap:2px}
+.rcard .nm{font-weight:700}
+.rcard.done{border-color:var(--ok)}
+.dot-ok{font-family:var(--mono);font-size:.72rem;color:var(--ok)}
+/* ficha */
+.shots{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+.shots figure{margin:0;flex:0 0 min(100%,420px);scroll-snap-align:start}
+.shots img,.shot{width:100%;max-height:min(62vh,520px);object-fit:contain;background:var(--surface2);border-radius:8px;display:block;cursor:zoom-in}
+.shots figcaption{font-size:.82rem;color:var(--muted);padding-top:4px}
+.spec{display:grid;grid-template-columns:1fr;gap:0;margin:0}
+.spec>div{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.spec dt{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding-top:3px}
+.spec dd{margin:0;min-width:0}
+.spec .gate dt{color:var(--accent)}
+.spec .gate dd{font-weight:600}
+@media (max-width:520px){.spec>div{grid-template-columns:1fr;gap:2px}}
+ul.tight{margin:0;padding-left:1.1rem;display:grid;gap:3px}
+.ext{color:var(--muted)} .ext::after{content:" *";color:var(--accent)}
+.hook{background:var(--accent-soft);color:var(--ink);border-radius:8px;padding:10px 12px}
+.hook b{color:var(--accent)}
+/* quiz */
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.opts.stack{grid-template-columns:1fr}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;text-align:left;font-weight:500}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt.good{border-color:var(--ok);background:var(--ok-soft)} .opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+input[type=text]{font:inherit;width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.progressbar{height:6px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.progressbar i{display:block;height:100%;background:var(--accent)}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+.stats b{color:var(--ink)}
+.q{display:grid;gap:10px}
+.step{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sg{display:flex;gap:8px;flex-wrap:wrap}
+.sg button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:.85rem}
+.sg button[aria-pressed="true"]{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.ans{display:grid;gap:8px}
+.ans>div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:6px}
+.ans .head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+/* tabla */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:separate;border-spacing:0;min-width:1180px;width:100%;font-size:.88rem}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);min-width:130px}
+th{position:sticky;top:0;background:var(--surface2);font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);z-index:2}
+th:first-child,td:first-child{position:sticky;left:0;background:var(--surface);z-index:1;min-width:128px;font-weight:700;border-right:1px solid var(--line)}
+th:first-child{background:var(--surface2);z-index:3}
+td.cover{cursor:pointer;color:transparent;background:var(--surface2);user-select:none;position:relative}
+td.cover::after{content:"tocar para ver";position:absolute;inset:0;display:flex;align-items:center;padding:0 12px;color:var(--muted);font-family:var(--mono);font-size:.7rem}
+/* guía */
+details.card{padding:0}
+details.card>summary{padding:14px 16px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:8px}
+details.card>summary::after{content:"+";font-family:var(--mono);color:var(--accent)}
+details.card[open]>summary::after{content:"–"}
+details.card>.body{padding:0 16px 16px;display:grid;gap:12px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.pairs>div{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:4px}
+.pairs b{font-size:.95rem}
+.imgfig{margin:0}.imgfig img{width:100%;max-width:560px;border-radius:8px;background:#fff;display:block;cursor:zoom-in}
+.imgfig figcaption{font-size:.82rem;color:var(--muted);padding-top:4px}
+.ftable{width:100%;min-width:0;font-size:.88rem}
+.ftable th,.ftable td{min-width:0;position:static}
+.ftable td:first-child,.ftable th:first-child{position:static;background:transparent;border-right:0}
+.ftable th{background:transparent}
+.wiz{display:grid;gap:10px}
+.crumbs{font-size:.82rem;color:var(--muted)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:50;padding:12px;cursor:zoom-out}
+#lb.on{display:flex} #lb img{max-width:100%;max-height:100%;object-fit:contain}
+.sr{position:absolute;left:-9999px}
+@media (prefers-reduced-motion:no-preference){.card,.rcard{transition:border-color .15s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Test de sedimentarias</h1>
+      <div class="sub">16 rocas · la tabla completa, con foto</div>
+    </div>
+    <div class="meter" id="meter"></div>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Secciones" id="tabs"></nav>
+  <main id="app"></main>
+</div>
+<div id="lb" role="dialog" aria-label="Foto ampliada"><img alt=""></div>
+
+<script>
+"use strict";
+/* ---------- datos (del PPT; lo marcado ext es ampliación mía para llegar a 3 protolitos) ---------- */
+const CK={'Detrítica':'det','Química':'qui','Bioquímica':'bio'};
+const R=[
+{id:'fangolita',nombre:'Fangolita',clase:'Detrítica',est:'Clástica / Pelita',origen:'Mecánico: transporte y sedimentación',
+ gran:'Lutita · 1/256–1/16 mm',comp:'Minerales arcillosos, Qz, carbonatos, clorita, minerales de Fe, Py',
+ prot:[['Limo'],['Arcilla'],['Lodo (limo + arcilla)',1]],
+ diag:['Grano muy fino: no se siente al tacto','Se pega a la lengua o al dedo mojado','Colores variados: el color no sirve, se reconoce por el tamaño de grano','Textura pelítica'],
+ truco:'Fango = lengua pegajosa. Si es fina, lisa y NO se abre en hojas, es fangolita.',conf:['lutita','marga','arenisca'],alias:[]},
+{id:'lutita',nombre:'Lutita',clase:'Detrítica',est:'Clástica / Pelita',origen:'Mecánico: transporte y sedimentación',
+ gran:'Lutita · 1/256–1/16 mm',comp:'Minerales arcillosos, Qz afanítico, ópalo, calcedonia, carbonatos, clorita, minerales de Fe, Py',
+ prot:[['Limo'],['Arcilla'],['Lodo (limo + arcilla)',1]],
+ diag:['Grano fino, no se siente al tacto','Fisible: se rompe en capas o láminas','Principalmente negra (por materia orgánica), aunque hay otros colores','Más compacta que la fangolita','Puede contener fósiles'],
+ truco:'Lutita = láminas. Se abre como libro y suele ser negra por materia orgánica.',conf:['fangolita','marga'],alias:['lutitas']},
+{id:'arenisca',nombre:'Arenisca',clase:'Detrítica',est:'Clástica / Psamita',origen:'Mecánico: transporte y sedimentación',
+ gran:'Arenita · 1/16–2 mm',comp:'Qz, feldespato, líticos, máficos',
+ compExtra:'Se clasifica como cuarzosa, feldespática o lítica con el triángulo Q–F–L de Folk (1970). Con 5–30 % de grava (>2 mm) pasa a arenisca conglomerádica. Ver la pestaña Guía.',
+ prot:[['Arena'],['Granitoides y otras rocas fuente (aportan Qz y feldespato)',1],['Rocas volcánicas y metamórficas (aportan líticos)',1]],
+ diag:['Porosa, buena selección, suele ser ligera (depende de la composición)','El grano se siente al tacto','Con lupa se aprecian los granos y la textura clástica','Buena selección: clastos de tamaño similar','Arcosas suelen ser más claras; las litarenitas, más oscuras'],
+ truco:'Arenisca = granos al tacto (como lija fina) y todos del mismo tamaño.',conf:['fangolita','conglomerado'],alias:['areniscas']},
+{id:'conglomerado',nombre:'Conglomerado',clase:'Detrítica',est:'Clástica / Psefita',origen:'Mecánico: transporte y sedimentación',
+ gran:'Rudita · 2–256 mm',comp:'Uno o varios elementos mezclados en una matriz',
+ prot:[['Ripio'],['Grava'],['Gravilla fina']],
+ diag:['Predominan clastos > 2 mm','Clastos redondeados en su mayoría','Mala selección y polimíctico (clastos de distintas composiciones)','Si la matriz es calcárea efervesce con HCl, pero no siempre la tiene'],
+ truco:'Conglomerado = clastos Redondeados (rodaron por un río). Brecha = clastos con Bordes filosos.',conf:['brecha','arenisca'],alias:[]},
+{id:'brecha',nombre:'Brecha sedimentaria',clase:'Detrítica',est:'Clástica / Psefita',origen:'Mecánico: transporte y sedimentación',
+ gran:'Rudita · 2–256 mm',comp:'Uno o varios elementos mezclados en una matriz',
+ prot:[['Ripio'],['Grava'],['Gravilla fina']],
+ diag:['Predominan clastos > 2 mm','Clastos angulosos en su mayoría','Mala selección y polimíctico (clastos de distintas composiciones)','Si la matriz es calcárea efervesce con HCl, pero no siempre la tiene'],
+ truco:'Brecha = clastos angulosos (poco transporte). Todo lo demás es igual al conglomerado.',conf:['conglomerado'],alias:['brecha sedimentaria']},
+{id:'caliza',nombre:'Caliza',clase:'Química',est:'No clástica / Densa, afanítica, cristalina, porosa, oolítica',origen:'Medio químico',
+ gran:'—',comp:'Principalmente calcita',
+ prot:[['Sedimentos carbonatados ricos en Ca'],['Lodo carbonatado (micrita)',1],['Conchas y esqueletos calcáreos',1]],
+ diag:['Efervescencia con HCl','Principalmente colores claros (no exclusivamente): amarillo, rojo, pardo y negro','La textura oolítica es característica'],
+ truco:'Caliza = burbujea con HCl y es de colores claros. Calcita.',conf:['dolomia','marga','travertino','coquina'],alias:['calizas'],
+ foto:'En la foto hay variedad: unas claras y densas, otras oscuras con textura punteada.'},
+{id:'dolomia',nombre:'Dolomía',clase:'Química',est:'No clástica / Densa, afanítica, cristalina',origen:'Medio químico',
+ gran:'—',comp:'Principalmente dolomita',
+ prot:[['Sedimentos carbonatados ricos en Ca y Mg'],['Caliza preexistente (dolomitización)',1],['Lodo carbonatado con Mg',1]],
+ diag:['Efervescencia con HCl','Principalmente colores oscuros (no exclusivamente)','Difícil de diferenciar de la caliza en muestra de mano','Raramente presenta fósiles'],
+ extra:'Dato extra: con HCl frío suele reaccionar más débil que la caliza.',
+ truco:'Dolomía = caliza oscura con Mg, sin fósiles. Mineral: dolomita.',conf:['caliza'],alias:['dolomias']},
+{id:'marga',nombre:'Marga',clase:'Química',est:'No clástica / Cristalina de grano fino',origen:'Medio químico',
+ gran:'Grano muy fino (microgranular) · < 1/256 mm',comp:'Mezcla de materia calcárea y minerales arcillosos',
+ prot:[['Sedimentos arcillosos y calcáreos'],['Arcilla',1],['Lodo calcáreo',1]],
+ diag:['Efervescencia con HCl','Grano muy fino (parecida a fangolita o lutita)','Desmenuzable','La presencia de fósiles es característica'],
+ truco:'Marga = barro + cal: fina, desmenuzable, con fósiles y burbujea con HCl.',conf:['caliza','lutita','fangolita'],alias:['margas']},
+{id:'silex',nombre:'Sílex',clase:'Química',est:'No clástica / Densa, afanítica, en fajas',origen:'Silícico marino profundo',
+ gran:'—',comp:'Mezcla de sílice coloidal, ópalo y calcedonia',
+ prot:[['Soluciones coloidales'],['Sílice disuelta en agua marina',1],['Restos silíceos de organismos (radiolarios, diatomeas, esponjas)',1]],
+ diag:['Abigarrada (varios colores)','Dura; olor a quemado al golpe de martillo','Fractura concoidea','Brillo mate o semivítreo','Cuarzo macizo/amorfo'],
+ truco:'Sílex = Súper duro, sin burbujas, fractura concoidea (como vidrio roto).',conf:[],alias:['silex','pedernal']},
+{id:'travertino',nombre:'Travertino',clase:'Química',est:'Clástica / Porosa',origen:'Precipitación de carbonatos',
+ gran:'—',comp:'Principalmente carbonatos',
+ aviso:'En el PPT figura como "Clástica / Porosa", aunque se forma por precipitación química. Para el test usa lo que dijo tu profe y, si puedes, confírmalo.',
+ prot:[['Sedimentos carbonatados ricos en Ca'],['Aguas termales o manantiales ricos en bicarbonato de Ca',1],['Calizas preexistentes disueltas (karst)',1]],
+ diag:['Efervescencia con HCl','Colores pardos','Textura porosa'],
+ truco:'Travertino = Tubos y poros, color pardo, nace de aguas ricas en carbonato.',conf:['caliza'],alias:[],
+ foto:'Son las dos de abajo (la porosa en la mano y la tubular). Las dos de arriba son marga.'},
+{id:'sal_gema',nombre:'Sal gema',clase:'Química',est:'No clástica / Cristalina o masiva',origen:'Evaporítico',
+ gran:'—',comp:'Principalmente halita',
+ prot:[['Na⁺ y Cl⁻ en disolución'],['Agua de mar',1],['Salmueras de lagos y cuencas cerradas',1]],
+ diag:['Agregados cristalinos','Sabor salado','A veces se ven cristales de halita bien formados'],
+ truco:'Sal gema = la única que sabe salada (halita).',conf:['yeso','anhidrita'],alias:['sal','halita','sal gema']},
+{id:'yeso',nombre:'Yeso',clase:'Química',est:'No clástica / Cristalina o masiva',origen:'Evaporítico',
+ gran:'—',comp:'Principalmente yeso',
+ prot:[['Solución sulfatada rica en Ca'],['Agua de mar evaporada',1],['Anhidrita rehidratada',1]],
+ diag:['Textura cristalina','Hábito laminar','Dureza muy baja: se raya con la uña'],
+ truco:'Yeso = la uña lo raya.',conf:['anhidrita','sal_gema'],alias:[]},
+{id:'anhidrita',nombre:'Anhidrita',clase:'Química',est:'No clástica / Cristalina',origen:'Evaporítico',
+ gran:'—',comp:'Principalmente anhidrita',
+ prot:[['Deshidratación de depósitos de yeso'],['Solución sulfatada rica en Ca',1],['Salmueras evaporíticas muy concentradas',1]],
+ diag:['Textura cristalina, hábito masivo o granular','Brillo vítreo','Más dura que el yeso: carece de agua en su fórmula'],
+ truco:'An-hidrita = sin agua. Más dura que el yeso: la uña no la raya.',conf:['yeso','sal_gema'],alias:[]},
+{id:'coquina',nombre:'Coquina',clase:'Bioquímica',est:'Bioclástica / Biogranular, grano grueso',origen:'Acumulación de conchas de moluscos',
+ gran:'Depende de la muestra',comp:'Conchas',
+ prot:[['Conchas'],['Moluscos (bivalvos y gastrópodos)',1],['Fragmentos bioclásticos / arena carbonatada',1]],
+ diag:['Efervescencia con HCl','Agregado de conchas de diversos moluscos','Muy frágil'],
+ truco:'Coquina = Conchas COmpactadas, se desarma fácil.',conf:['caliza'],alias:[]},
+{id:'bituminoso',nombre:'Carbón bituminoso',clase:'Bioquímica',est:'No clástica / Amorfa',origen:'Pantanos con vegetación',
+ gran:'—',comp:'Masa orgánica: C 60–92 %, H 3–6 %, H₂O 5–30 %',
+ prot:[['Restos vegetales'],['Turba',1],['Lignito (carbón de menor rango)',1]],
+ diag:['Color negro o pardo','Raya negra o café oscuro','Mancha los dedos','Brillo mate','Fractura prismática'],
+ truco:'Rango del carbón: turba → lignito → bituminoso → antracita. Bituminoso = mate, 60–92 % de C.',conf:['antracita'],alias:['bituminoso','carbon','hulla']},
+{id:'antracita',nombre:'Carbón antracita',clase:'Bioquímica',est:'No clástica / Amorfa fajeada',origen:'Pantanos con vegetación',
+ gran:'—',comp:'Masa orgánica: C 92–97 %, H 1–3 %, H₂O 1–3 %',
+ prot:[['Restos vegetales'],['Carbón bituminoso (más temperatura y presión)',1],['Turba y lignito',1]],
+ diag:['Color negro a gris acero o pardo','Raya negra o café oscuro','Mancha los dedos','Brillo llamativo','Fractura prismática'],
+ extra:'Dato extra: en la práctica la antracita suele ensuciar menos que el bituminoso.',
+ truco:'Antracita = brillante, el carbón de mayor rango: 92–97 % de C y casi sin agua.',conf:['bituminoso'],alias:['antracita']}
+];
+const BY=Object.fromEntries(R.map(r=>[r.id,r]));
+const PHOTOS={ // fotos de estudio (con etiqueta) y de quiz (sin etiqueta)
+ study:{arenisca:['arenisca_1','arenisca_2']},
+ quiz:{}
+};
+const sPhotos=id=>(PHOTOS.study[id]||[id]).map(k=>'img/s_'+k+'.jpg');
+const qPhoto=id=>'img/q_'+(id==='arenisca'?'arenisca_1':id)+'.jpg';
+const EXCL={fangolita:['lutita'],lutita:['fangolita'],conglomerado:['brecha'],brecha:['conglomerado'],caliza:['travertino'],travertino:['caliza']};
+const COLS=['Clasificación','Estructura / Textura','Origen','Granulometría','Componentes','Protolitos (mín. 3)','Diagnósticos'];
+
+/* ---------- utilidades ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const lev=(a,b)=>{const m=a.length,n=b.length;const d=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);for(let j=0;j<=n;j++)d[0][j]=j;
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function nameMatches(input,rock){
+  const x=norm(input); if(!x) return false;
+  const names=[rock.nombre,...rock.alias].map(norm);
+  if(rock.id==='bituminoso') names.push('carbon bituminoso');
+  if(rock.id==='antracita') names.push('carbon antracita');
+  return names.some(n=>x===n||(n.length>5&&lev(x,n)<=1));
+}
+let store={};
+try{store=JSON.parse(localStorage.getItem('sed_v1')||'{}')}catch(e){store={}}
+const save=()=>{try{localStorage.setItem('sed_v1',JSON.stringify(store))}catch(e){}};
+const st=id=>store[id]||(store[id]={n:0,name:0,comp:0,mastered:false});
+const acc=id=>{const s=store[id];return s&&s.n?(s.name+s.comp)/(2*s.n):null};
+const tag=c=>`<span class="tag c-${CK[c]}">${c}</span>`;
+const protHTML=r=>`<ul class="tight">${r.prot.map(p=>`<li class="${p[1]?'ext':''}">${esc(p[0])}</li>`).join('')}</ul>`;
+const diagHTML=r=>`<ul class="tight">${r.diag.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>`;
+
+/* ---------- estado y navegación ---------- */
+const TABS=[['fichas','Fichas'],['fotos','Fotos'],['sim','Test'],['guia','Guía'],['tabla','Tabla']];
+const S={tab:'fichas',filter:'Todas',detail:null,
+  drill:{pool:'all',mode:'pick',cur:null,stage:0,nameOk:null,compOk:null,opts:[],streak:0,ok:0,total:0,typed:''},
+  sim:{phase:'start',mode:'pick',list:[],i:0,res:[],a:{name:null,comp:null,clase:null},opts:[],chk:null,self:{}},
+  wiz:['root'],hide:new Set(),revealed:new Set(),folk:null};
+
+function setTab(t){S.tab=t;S.detail=null;render();window.scrollTo({top:0})}
+function renderTabs(){
+  $('#tabs').innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${S.tab===k}" data-act="tab" data-k="${k}">${l}</button>`).join('');
+  const m=R.filter(r=>store[r.id]&&store[r.id].mastered).length;
+  $('#meter').innerHTML=`<b>${m}</b>/16 dominadas`;
+}
+function render(){
+  renderTabs();
+  const v={fichas:vFichas,fotos:vFotos,sim:vSim,guia:vGuia,tabla:vTabla}[S.tab];
+  $('#app').innerHTML=v();
+  if(S.tab==='fotos'&&S.drill.stage===0&&S.drill.mode==='type'){const i=$('#nameInput');if(i)i.focus({preventScroll:true})}
+}
+
+/* ---------- FICHAS ---------- */
+function vFichas(){
+  if(S.detail) return vDetail(BY[S.detail]);
+  const fs=['Todas','Detrítica','Química','Bioquímica'];
+  const list=R.filter(r=>S.filter==='Todas'||r.clase===S.filter);
+  return `<div class="row">${fs.map(f=>`<button class="chip" aria-pressed="${S.filter===f}" data-act="filter" data-k="${f}">${f==='Todas'?'Todas':f+'s'}</button>`).join('')}</div>
+  <div class="grid">${list.map(r=>`<button class="rcard ${st(r.id).mastered?'done':''}" data-act="open" data-id="${r.id}">
+    <img src="${sPhotos(r.id)[0]}" alt="Foto de ${esc(r.nombre)}" loading="lazy">
+    <span class="meta">${tag(r.clase)}<span class="nm">${esc(r.nombre)}</span>${st(r.id).mastered?'<span class="dot-ok">dominada</span>':''}</span></button>`).join('')}</div>
+  <p class="muted" style="margin:0;font-size:.88rem">Toca una roca para ver su fila completa. Lo marcado con <span class="ext">*</span> es ampliación mía, no está en el PPT.</p>`;
+}
+function vDetail(r){
+  const i=R.indexOf(r),prev=R[(i+15)%16],next=R[(i+1)%16];
+  const caps=sPhotos(r.id).map((p,k)=>`<figure><img src="${p}" alt="Foto de ${esc(r.nombre)}" data-act="zoom">${k===0&&r.foto?`<figcaption>${esc(r.foto)}</figcaption>`:''}</figure>`).join('');
+  return `<div class="row" style="justify-content:space-between">
+    <button class="btn ghost" data-act="back">← Todas</button>
+    <div class="row"><button class="chip" data-act="open" data-id="${prev.id}">← ${esc(prev.nombre)}</button><button class="chip" data-act="open" data-id="${next.id}">${esc(next.nombre)} →</button></div></div>
+  <div class="card q">
+    <div>${tag(r.clase)}<h2 style="font-size:1.7rem;margin-top:2px">${esc(r.nombre)}</h2></div>
+    <div class="shots">${caps}</div>
+    <div class="hook"><b>Truco:</b> ${esc(r.truco)}</div>
+    ${r.aviso?`<div class="notice">${esc(r.aviso)}</div>`:''}
+    <dl class="spec">
+      <div class="gate"><dt>Componentes</dt><dd>${esc(r.comp)}${r.compExtra?`<div class="muted" style="font-weight:400;margin-top:4px">${esc(r.compExtra)}</div>`:''}</dd></div>
+      <div><dt>Clasificación</dt><dd>${esc(r.clase)}</dd></div>
+      <div><dt>Estructura / Textura</dt><dd>${esc(r.est)}</dd></div>
+      <div><dt>Origen</dt><dd>${esc(r.origen)}</dd></div>
+      <div><dt>Granulometría</dt><dd>${esc(r.gran)}</dd></div>
+      <div><dt>Protolitos</dt><dd>${protHTML(r)}</dd></div>
+      <div><dt>Diagnósticos</dt><dd>${diagHTML(r)}${r.extra?`<div class="ext" style="margin-top:6px">${esc(r.extra)}</div>`:''}</dd></div>
+      ${r.conf.length?`<div><dt>Se confunde con</dt><dd class="row">${r.conf.map(c=>`<button class="chip" data-act="open" data-id="${c}">${esc(BY[c].nombre)}</button>`).join('')}</dd></div>`:''}
+    </dl>
+    <div class="row"><button class="btn ${st(r.id).mastered?'ghost':''}" data-act="master" data-id="${r.id}">${st(r.id).mastered?'Marcada como dominada ✓':'Ya la domino'}</button></div>
+  </div>`;
+}
+
+/* ---------- opciones de componentes ---------- */
+function compOptions(r){
+  const ex=EXCL[r.id]||[];
+  const pool=R.filter(x=>x.id!==r.id&&!ex.includes(x.id)&&x.comp!==r.comp);
+  const same=shuffle(pool.filter(x=>x.clase===r.clase)), other=shuffle(pool.filter(x=>x.clase!==r.clase));
+  const chosen=[...same.slice(0,2),...other].filter((x,i,a)=>a.findIndex(y=>y.comp===x.comp)===i).slice(0,3);
+  return shuffle([r.comp,...chosen.map(x=>x.comp)]);
+}
+const nameChips=()=>R.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(r=>r).map(r=>r);
+function namePicker(selected,locked,correct){
+  return `<div class="opts">${nameChips().map(r=>{
+    let c='opt';if(locked){if(r.id===correct)c+=' good';else if(r.id===selected)c+=' wrong'}
+    return `<button class="${c}" aria-pressed="${selected===r.id&&!locked}" ${locked?'disabled':''} data-act="pickname" data-id="${r.id}">${esc(r.nombre)}</button>`}).join('')}</div>`;
+}
+function typedBox(val,locked){
+  return `<form data-act="typed" class="row" style="flex-wrap:nowrap"><input type="text" id="nameInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Escribe el nombre de la roca" value="${esc(val||'')}" ${locked?'disabled':''}>
+  ${locked?'':'<button class="btn" type="submit">OK</button>'}</form>`;
+}
+function modeToggle(cur,act){
+  return `<div class="row"><span class="label">Nombre</span><button class="chip" aria-pressed="${cur==='pick'}" data-act="${act}" data-k="pick">Elegir</button><button class="chip" aria-pressed="${cur==='type'}" data-act="${act}" data-k="type">Escribir (como en el test)</button></div>`;
+}
+function compPicker(opts,selected,locked,correct){
+  return `<div class="opts stack">${opts.map((o,i)=>{
+    let c='opt';if(locked){if(o===correct)c+=' good';else if(i===selected)c+=' wrong'}
+    return `<button class="${c}" aria-pressed="${selected===i&&!locked}" ${locked?'disabled':''} data-act="pickcomp" data-i="${i}">${esc(o)}</button>`}).join('')}</div>`;
+}
+function quickRow(r){
+  return `<dl class="spec"><div class="gate"><dt>Componentes</dt><dd>${esc(r.comp)}</dd></div><div><dt>Clasificación</dt><dd>${esc(r.clase)}</dd></div>
+  <div><dt>Textura</dt><dd>${esc(r.est)}</dd></div><div><dt>Origen · Granulometría</dt><dd>${esc(r.origen)} · ${esc(r.gran)}</dd></div>
+  <div><dt>Diagnósticos</dt><dd>${diagHTML(r)}</dd></div></dl>`;
+}
+
+/* ---------- FOTOS (quiz rápido: nombre → componentes) ---------- */
+function nextDrill(){
+  const D=S.drill;let pool=R;
+  if(D.pool==='weak'){const w=R.filter(r=>!st(r.id).mastered&&(acc(r.id)===null||acc(r.id)<.8));if(w.length)pool=w}
+  const weights=pool.map(r=>{const a=acc(r.id);return r===D.cur?0:1+(a===null?1.5:3*(1-a))});
+  let t=Math.random()*weights.reduce((x,y)=>x+y,0),c=pool[0];
+  for(let i=0;i<pool.length;i++){t-=weights[i];if(t<=0){c=pool[i];break}}
+  Object.assign(D,{cur:c,stage:0,nameOk:null,compOk:null,opts:compOptions(c),picked:null,typed:''});
+}
+function vFotos(){
+  const D=S.drill;if(!D.cur)nextDrill();
+  const r=D.cur;
+  const weakCount=R.filter(x=>!st(x.id).mastered&&acc(x.id)!==null&&acc(x.id)<.8).length;
+  const head=`<div class="card q">
+    <div class="row">${modeToggle(D.mode,'dmode')}</div>
+    <div class="row"><span class="label">Rocas</span><button class="chip" aria-pressed="${D.pool==='all'}" data-act="dpool" data-k="all">Todas</button>
+    <button class="chip" aria-pressed="${D.pool==='weak'}" data-act="dpool" data-k="weak">Solo las que fallo (${weakCount})</button></div>
+    <div class="stats"><span>Racha <b>${D.streak}</b></span><span>Aciertos <b>${D.ok}/${D.total}</b></span></div></div>`;
+  let body=`<div class="card q"><img class="shot" src="${qPhoto(r.id)}" alt="Muestra de mano" data-act="zoom">`;
+  if(D.stage===0){
+    body+=`<div class="step">1 · ¿Qué roca es?</div>${D.mode==='pick'?namePicker(D.picked,false,r.id):typedBox(D.typed,false)}`;
+  }else{
+    body+=`<div class="step">1 · ¿Qué roca es?</div><div class="notice ${D.nameOk?'ok':'bad'}">${D.nameOk?'Correcto: ':'Era '}<b>${esc(r.nombre)}</b>${D.nameOk?'':' · sin el nombre, en el test el resto cuenta malo'}</div>
+    <div class="step">2 · Sus componentes de clasificación / composición</div>${compPicker(D.opts,D.picked2,D.stage===2,r.comp)}`;
+    if(D.stage===2){
+      body+=`<div class="notice ${D.compOk?'ok':'bad'}">${D.compOk?'Componentes correctos.':'Los componentes de la '+esc(r.nombre)+' son: '+esc(r.comp)}</div>
+      <div class="hook"><b>Truco:</b> ${esc(r.truco)}</div>${quickRow(r)}
+      <div class="row"><button class="btn" data-act="dnext">Siguiente roca</button><button class="btn ghost" data-act="open" data-id="${r.id}">Abrir ficha</button></div>`;
+    }
+  }
+  return head+body+'</div>';
+}
+function drillName(ok){
+  const D=S.drill,r=D.cur;D.nameOk=ok;D.stage=1;D.picked2=null;
+  const s=st(r.id);s.n++;if(ok)s.name++;save();render();
+}
+function drillComp(i){
+  const D=S.drill,r=D.cur;D.picked2=i;D.compOk=D.opts[i]===r.comp;D.stage=2;
+  const s=st(r.id);if(D.compOk)s.comp++;
+  D.total++;if(D.nameOk&&D.compOk){D.ok++;D.streak++}else D.streak=0;
+  save();render();
+}
+
+/* ---------- SIMULACRO ---------- */
+function startSim(){
+  const A=S.sim;A.list=shuffle(R).slice(0,10);A.i=0;A.res=[];A.phase='q';resetSimQ();render();window.scrollTo({top:0})
+}
+function resetSimQ(){const A=S.sim;A.a={name:null,comp:null,clase:null,typed:''};A.opts=compOptions(A.list[A.i]);A.chk=null;A.self={}}
+function simGate(){const A=S.sim,r=A.list[A.i];
+  const nameOk=A.mode==='pick'?A.a.name===r.id:nameMatches(A.a.typed,r);
+  const compOk=A.opts[A.a.comp]===r.comp,claseOk=A.a.clase===r.clase;return{nameOk,compOk,claseOk,gate:nameOk&&compOk}}
+const SELF=[['est','Estructura / Textura'],['origen','Origen'],['gran','Granulometría'],['prot','Protolitos (3)'],['diag','Diagnósticos']];
+function vSim(){
+  const A=S.sim;
+  if(A.phase==='start') return `<div class="card q"><h2>Simulacro de 10 rocas</h2>
+    <p style="margin:0">Igual que el test: te sale una muestra y llenas la fila. Primero el <b>nombre</b> y los <b>componentes</b>; si fallas alguno, el resto de la fila cuenta como malo. Después marcas tú qué te sabías de las otras columnas.</p>
+    ${modeToggle(A.mode,'smode')}<div class="row"><button class="btn" data-act="sstart">Empezar</button></div></div>`;
+  if(A.phase==='end') return vSimEnd();
+  const r=A.list[A.i],pct=(A.i+(A.chk?1:0))/10*100;
+  const head=`<div class="card q"><div class="row" style="justify-content:space-between"><span class="step">Roca ${A.i+1} de 10</span><button class="chip" data-act="squit">Salir</button></div><div class="progressbar"><i style="width:${pct}%"></i></div></div>`;
+  let b=`<div class="card q"><img class="shot" src="${qPhoto(r.id)}" alt="Muestra de mano" data-act="zoom">`;
+  if(!A.chk){
+    const ready=(A.mode==='pick'?!!A.a.name:norm(A.a.typed||'')!=='')&&A.a.comp!==null&&A.a.clase;
+    b+=`<div class="step">1 · Nombre</div>${A.mode==='pick'?namePicker(A.a.name,false,null):typedBox(A.a.typed,false)}
+    <div class="step">2 · Componentes de clasificación / composición</div>${compPicker(A.opts,A.a.comp,false)}
+    <div class="step">3 · Clasificación</div><div class="opts">${['Detrítica','Química','Bioquímica'].map(c=>`<button class="opt" aria-pressed="${A.a.clase===c}" data-act="pickclase" data-k="${c}">${c}</button>`).join('')}</div>
+    <div class="notice info">Piensa también en estructura/textura, origen, granulometría, 3 protolitos y diagnósticos. Eso lo revisas al comprobar.</div>
+    <div class="row"><button class="btn" data-act="scheck" ${ready?'':'disabled'}>Comprobar fila</button></div>`;
+  }else{
+    const g=A.chk;
+    b+=`<div class="notice ${g.gate?'ok':'bad'}">${g.gate?'Pasaste la puerta: nombre y componentes bien.':'No pasaste la puerta: en el test el resto de esta fila contaría malo.'}</div>
+    <div class="ans"><div><div class="head"><span class="label">Nombre</span><b style="color:var(--${g.nameOk?'ok':'bad'})">${g.nameOk?'✓':'✗'} ${esc(r.nombre)}</b></div>${!g.nameOk?`<span class="muted">Tú: ${esc(A.mode==='pick'?(A.a.name?BY[A.a.name].nombre:'—'):A.a.typed)}</span>`:''}</div>
+    <div><div class="head"><span class="label">Componentes</span><b style="color:var(--${g.compOk?'ok':'bad'})">${g.compOk?'✓':'✗'}</b></div><span>${esc(r.comp)}</span>${!g.compOk?`<span class="muted">Elegiste: ${esc(A.opts[A.a.comp])}</span>`:''}</div>
+    <div><div class="head"><span class="label">Clasificación</span><b style="color:var(--${g.claseOk?'ok':'bad'})">${g.claseOk?'✓':'✗'} ${esc(r.clase)}</b></div></div>
+    ${SELF.map(([k,l])=>`<div><div class="head"><span class="label">${l}</span><span class="sg">${g.gate?`<button aria-pressed="${A.self[k]===true}" data-act="self" data-k="${k}" data-v="1">Lo tenía</button><button aria-pressed="${A.self[k]===false}" data-act="self" data-k="${k}" data-v="0" style="${A.self[k]===false?'background:var(--bad-soft);border-color:var(--bad);color:var(--bad)':''}">No</button>`:''}</span></div>
+      <div>${k==='est'?esc(r.est):k==='origen'?esc(r.origen):k==='gran'?esc(r.gran):k==='prot'?protHTML(r):diagHTML(r)}</div></div>`).join('')}</div>
+    <div class="hook"><b>Truco:</b> ${esc(r.truco)}</div>
+    <div class="row"><button class="btn" data-act="snext">${A.i===9?'Ver resultado':'Siguiente roca'}</button></div>`;
+  }
+  return head+b+'</div>';
+}
+function simScore(){const A=S.sim,g=A.chk;let s=0;if(g.gate){s=2+(g.claseOk?1:0)+SELF.filter(([k])=>A.self[k]===true).length}return s}
+function vSimEnd(){
+  const A=S.sim,tot=A.res.reduce((a,x)=>a+x.s,0),gate=A.res.filter(x=>x.gate).length;
+  return `<div class="card q"><h2>Resultado</h2>
+  <div class="stats"><span>Puerta superada <b>${gate}/10</b></span><span>Puntaje <b>${tot}/80</b></span><span>Aprox. <b>${Math.round(tot/80*100)} %</b></span></div>
+  <div class="ans">${A.res.map(x=>`<div><div class="head"><b>${esc(BY[x.id].nombre)}</b><span class="mono" style="color:var(--${x.gate?'ok':'bad'})">${x.gate?x.s+'/8':'puerta fallada · 0/8'}</span></div>
+    ${x.gate?'':`<span class="muted">${x.nameOk?'':'Nombre mal. '}${x.compOk?'':'Componentes mal.'}</span>`}<button class="chip" style="justify-self:start" data-act="open" data-id="${x.id}">Ver ficha</button></div>`).join('')}</div>
+  <div class="row"><button class="btn" data-act="sstart">Otro simulacro</button></div></div>`;
+}
+
+/* ---------- GUÍA ---------- */
+const T={
+ root:['¿Se ven o se sienten granos o fragmentos (clastos) pegados entre sí?',[['Sí, hay granos o clastos','g1'],['No: es cristalina, densa, porosa, de conchas o de aspecto orgánico','n1']]],
+ g1:['¿De qué tamaño son?',[['Grandes, a simple vista (> 2 mm)','g2'],['Medianos: se sienten arenosos, granos visibles con lupa','=arenisca'],['Finos: tacto liso, no se ven los granos','g3']]],
+ g2:['¿Cómo son los clastos?',[['Redondeados','=conglomerado'],['Angulosos','=brecha']]],
+ g3:['¿Se rompe en láminas, es más compacta y tira a negra?',[['Sí','=lutita'],['No','g4']]],
+ g4:['¿Efervesce con HCl, es desmenuzable y tiene fósiles?',[['Sí','=marga'],['No: es masiva, se pega a la lengua','=fangolita']]],
+ n1:['¿Es negra, liviana, de aspecto orgánico y mancha los dedos?',[['Sí','c1'],['No','n2']]],
+ c1:['¿Cómo es el brillo?',[['Mate, pardo a negro, fractura prismática','=bituminoso'],['Llamativo, negro a gris acero','=antracita']]],
+ n2:['¿Efervesce con HCl?',[['Sí','h1'],['No','n3']]],
+ h1:['¿Cómo se ve?',[['Agregado de conchas, muy frágil','=coquina'],['Muy porosa o tubular, color pardusco','=travertino'],['Grano muy fino, desmenuzable, con fósiles','=marga'],['Oscura, parecida a caliza, reacción más débil','=dolomia'],['Densa y clara (amarillo, rojo, pardo), oolítica o con fósiles','=caliza']]],
+ n3:['¿Tiene sabor salado?',[['Sí','=sal_gema'],['No','n4']]],
+ n4:['¿Se raya con la uña?',[['Sí','=yeso'],['No','n5']]],
+ n5:['¿Es muy dura, de fractura concoidea, brillo mate o semivítreo y abigarrada?',[['Sí','=silex'],['No: cristalina o granular, brillo vítreo','=anhidrita']]]
+};
+const PARES=[
+ ['Fangolita vs Lutita','Las dos son pelitas. La lutita es fisible (se abre en láminas), más compacta y suele ser negra. La fangolita es masiva.'],
+ ['Lutita / Fangolita vs Marga','Granos igual de finos, pero la marga burbujea con HCl, se desmenuza y trae fósiles.'],
+ ['Arenisca vs Fangolita','Arenisca: se sienten los granos y se ven con lupa. Fangolita: tacto liso y se pega a la lengua.'],
+ ['Conglomerado vs Brecha','Mismo tamaño de clastos (rudita) y misma composición. Redondeados = conglomerado; angulosos = brecha.'],
+ ['Caliza vs Dolomía','Las dos con HCl. Caliza: colores claros, fósiles y textura oolítica, calcita. Dolomía: más oscura, rara vez con fósiles, dolomita.'],
+ ['Caliza vs Marga vs Travertino vs Coquina','Caliza: densa y clara. Marga: fina, desmenuzable, arcillosa. Travertino: porosa y parda. Coquina: pura acumulación de conchas, frágil.'],
+ ['Yeso vs Anhidrita vs Sal gema','Las tres blancas y cristalinas. Sal gema: sabor salado. Yeso: la uña lo raya. Anhidrita: más dura, brillo vítreo, sin agua.'],
+ ['Sílex vs el resto','No burbujea, muy duro, fractura concoidea, brillo mate/semivítreo, colores abigarrados.'],
+ ['Carbón bituminoso vs Antracita','Bituminoso: mate, 60–92 % C. Antracita: brillo llamativo, 92–97 % C, casi sin agua. Rango: turba → lignito → bituminoso → antracita.']
+];
+const FOLK=[['Cuarzoarenita','Q > 95 %'],['Subarcosa','Q 75–95 % y F > L'],['Sublitarenita','Q 75–95 % y L > F'],['Arcosa','Q < 75 % y F:L > 3:1'],['Arcosa lítica','Q < 75 % y F:L entre 1:1 y 3:1'],['Litarenita arcósica','Q < 75 % y F:L entre 1:3 y 1:1'],['Litarenita','Q < 75 % y F:L < 1:3']];
+function folkClass(Q,F,L){
+  if(Q>95)return'Cuarzoarenita';
+  if(Q>=75)return F>=L?'Subarcosa':'Sublitarenita';
+  const r=L===0?99:F/L;
+  return r>3?'Arcosa':r>=1?'Arcosa lítica':r>=1/3?'Litarenita arcósica':'Litarenita';
+}
+function newFolk(){
+  const target=pick(FOLK.map(f=>f[0]));let Q,share;const rnd=(a,b)=>a+Math.random()*(b-a);
+  if(target==='Cuarzoarenita'){Q=Math.round(rnd(96,99));share=rnd(.2,.8)}
+  else if(target==='Subarcosa'){Q=Math.round(rnd(78,93));share=rnd(.6,.9)}
+  else if(target==='Sublitarenita'){Q=Math.round(rnd(78,93));share=rnd(.1,.4)}
+  else{Q=Math.round(rnd(35,70));share={'Arcosa':rnd(.8,.93),'Arcosa lítica':rnd(.55,.72),'Litarenita arcósica':rnd(.28,.45),'Litarenita':rnd(.06,.2)}[target]}
+  const rest=100-Q,F=Math.round(rest*share),L=rest-F;
+  S.folk={Q,F,L,ans:folkClass(Q,F,L),sel:null};
+}
+const OPEN=new Set(['wiz']);const od=k=>OPEN.has(k)?'open':'';
+function vGuia(){
+  const k=S.wiz[S.wiz.length-1],node=T[k];
+  let wiz;
+  if(k[0]==='='){const r=BY[k.slice(1)];
+    wiz=`<div class="notice ok">Es <b>${esc(r.nombre)}</b></div>${quickRow(r)}<div class="row"><button class="btn" data-act="open" data-id="${r.id}">Abrir ficha</button><button class="btn ghost" data-act="wrestart">Otra muestra</button></div>`;
+  }else{
+    wiz=`<div class="step">Paso ${S.wiz.length}</div><h3>${node[0]}</h3><div class="opts stack">${node[1].map(([t,n])=>`<button class="opt" data-act="wnext" data-k="${n}">${t}</button>`).join('')}</div>
+    <div class="row">${S.wiz.length>1?'<button class="chip" data-act="wback">← Atrás</button>':''}${S.wiz.length>1?'<button class="chip" data-act="wrestart">Reiniciar</button>':''}</div>`;
+  }
+  if(!S.folk)newFolk();const f=S.folk;
+  const folkQ=`<div class="card" style="background:var(--surface2)"><div class="label">Practica</div><p style="margin:4px 0 10px;font-size:1.05rem">Q = <b>${f.Q} %</b> · F = <b>${f.F} %</b> · L = <b>${f.L} %</b> ¿Qué arenisca es?</p>
+    <div class="opts">${FOLK.map(([n])=>{let c='opt';if(f.sel){if(n===f.ans)c+=' good';else if(n===f.sel)c+=' wrong'}return `<button class="${c}" ${f.sel?'disabled':''} data-act="folk" data-k="${n}">${n}</button>`}).join('')}</div>
+    ${f.sel?`<div class="notice ${f.sel===f.ans?'ok':'bad'}" style="margin-top:10px">${f.sel===f.ans?'Correcto.':'Era '+f.ans+'.'} ${f.Q>95?'Q > 95 %.':f.Q>=75?'Q entre 75 y 95 %, '+(f.F>=f.L?'F > L.':'L > F.'):'Q < 75 %, F:L = '+(f.L?(f.F/f.L).toFixed(2):'∞')+':1.'}</div><div class="row" style="margin-top:8px"><button class="btn" data-act="folknew">Otra</button></div>`:''}</div>`;
+  return `<details class="card" data-d="wiz" ${od('wiz')}><summary>¿Qué roca es? Árbol de identificación</summary><div class="body"><div class="wiz">${wiz}</div></div></details>
+  <details class="card" data-d="pruebas" ${od('pruebas')}><summary>Pruebas que siempre debes hacer</summary><div class="body"><ul class="tight">
+   <li><b>Tacto y lupa:</b> ¿se sienten granos? ¿de qué tamaño?</li><li><b>HCl:</b> burbujea → carbonatos (caliza, dolomía, marga, travertino, coquina; a veces la matriz de conglomerado o brecha).</li>
+   <li><b>Uña:</b> si la raya, es yeso.</li><li><b>Sabor:</b> salado → sal gema.</li><li><b>Dureza y fractura:</b> muy dura y concoidea → sílex.</li><li><b>Raya y dedos:</b> negra y mancha → carbón.</li></ul>
+   <div class="muted" style="font-size:.88rem">Abreviaturas del PPT: Mxs = minerales · Qz = cuarzo · Fsp = feldespato · Py = pirita · Fe = hierro · Ca = calcio · Mg = magnesio.</div></div></details>
+  <details class="card" data-d="pares" ${od('pares')}><summary>Pares que se confunden</summary><div class="body"><div class="pairs">${PARES.map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join('')}</div></div></details>
+  <details class="card" data-d="folk" ${od('folk')}><summary>Areniscas: Folk y tamaños de grano</summary><div class="body">
+   <p style="margin:0">Para las areniscas hay que decir si son <b>cuarzosas, feldespáticas o líticas</b> con el triángulo Q–F–L (Folk, 1970).</p>
+   <figure class="imgfig"><img src="img/folk_qfl.jpg" alt="Triángulo de Folk Q-F-L" data-act="zoom"><figcaption>Triángulo de clasificación composicional (del PPT)</figcaption></figure>
+   <div class="tablewrap"><table class="ftable"><thead><tr><th>Nombre</th><th>Regla</th></tr></thead><tbody>${FOLK.map((f,i)=>`<tr><td><b>${i+1}. ${f[0]}</b></td><td>${f[1]}</td></tr>`).join('')}</tbody></table></div>
+   ${folkQ}
+   <figure class="imgfig"><img src="img/folk_textural.jpg" alt="Triángulo textural grava arena fangos" data-act="zoom"><figcaption>Triángulo textural: arenisca conglomerádica entre 5 y 30 % de grava (del PPT)</figcaption></figure>
+   <figure class="imgfig"><img src="img/granulometria.jpg" alt="Escala granulométrica" data-act="zoom"><figcaption>Escala granulométrica Wentworth / DIN 4022 (del PPT)</figcaption></figure></div></details>`;
+}
+
+/* ---------- TABLA (para tapar y repasar) ---------- */
+function cellHTML(r,c){
+  return [r.clase,r.est,r.origen,r.gran,r.comp,protHTML(r),diagHTML(r)][c];
+}
+function vTabla(){
+  const chips=COLS.map((c,i)=>`<button class="chip" aria-pressed="${S.hide.has(i)}" data-act="hidecol" data-i="${i}">${c}</button>`).join('');
+  return `<div class="card q"><div class="label">Tapar columnas para autoevaluarte</div><div class="row">${chips}</div>
+  <div class="row"><button class="chip" data-act="hideall">Tapar todo menos el nombre</button><button class="chip" data-act="showall">Mostrar todo</button></div>
+  <div class="muted" style="font-size:.88rem">Toca una celda tapada para verla. Desliza la tabla hacia los lados. * = ampliación mía.</div></div>
+  <div class="tablewrap"><table><thead><tr><th>Nombre de Rxs.</th>${COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>
+  ${R.map(r=>`<tr><td><button data-act="open" data-id="${r.id}" style="all:unset;cursor:pointer;font-weight:700">${esc(r.nombre)}</button><div>${tag(r.clase)}</div></td>${COLS.map((_,c)=>{const key=r.id+':'+c,cov=S.hide.has(c)&&!S.revealed.has(key);
+    return `<td class="${cov?'cover':''}" ${cov?`data-act="reveal" data-k="${key}"`:''}>${cellHTML(r,c)}</td>`}).join('')}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,D=S.drill,A=S.sim;
+  if(a==='tab')return setTab(t.dataset.k);
+  if(a==='zoom'){const lb=$('#lb');$('img',lb).src=t.src;lb.classList.add('on');return}
+  if(a==='open'){S.tab='fichas';S.detail=t.dataset.id;render();window.scrollTo({top:0});return}
+  if(a==='back'){S.detail=null;render();return}
+  if(a==='filter'){S.filter=t.dataset.k;render();return}
+  if(a==='master'){const s=st(t.dataset.id);s.mastered=!s.mastered;save();render();return}
+  // fotos
+  if(a==='dmode'){D.mode=t.dataset.k;D.picked=null;render();return}
+  if(a==='dpool'){D.pool=t.dataset.k;nextDrill();render();return}
+  if(a==='dnext'){nextDrill();render();return}
+  if(a==='pickname'){
+    if(S.tab==='fotos'){D.picked=t.dataset.id;drillName(t.dataset.id===D.cur.id)}
+    else{A.a.name=t.dataset.id;render()}
+    return}
+  if(a==='pickcomp'){
+    const i=+t.dataset.i;
+    if(S.tab==='fotos')drillComp(i);else{A.a.comp=i;render()}
+    return}
+  // simulacro
+  if(a==='smode'){A.mode=t.dataset.k;render();return}
+  if(a==='sstart')return startSim();
+  if(a==='squit'){A.phase='start';render();return}
+  if(a==='pickclase'){A.a.clase=t.dataset.k;render();return}
+  if(a==='scheck'){A.chk=simGate();render();return}
+  if(a==='self'){A.self[t.dataset.k]=t.dataset.v==='1';render();return}
+  if(a==='snext'){
+    const g=A.chk;A.res.push({id:A.list[A.i].id,s:simScore(),gate:g.gate,nameOk:g.nameOk,compOk:g.compOk});
+    const r=A.list[A.i],s=st(r.id);s.n++;if(g.nameOk)s.name++;if(g.compOk)s.comp++;save();
+    if(A.i===9)A.phase='end';else{A.i++;resetSimQ()}
+    render();window.scrollTo({top:0});return}
+  // guía
+  if(a==='wnext'){S.wiz.push(t.dataset.k);render();return}
+  if(a==='wback'){S.wiz.pop();render();return}
+  if(a==='wrestart'){S.wiz=['root'];render();return}
+  if(a==='folk'){S.folk.sel=t.dataset.k;render();return}
+  if(a==='folknew'){newFolk();render();return}
+  // tabla
+  if(a==='hidecol'){const i=+t.dataset.i;S.hide.has(i)?S.hide.delete(i):S.hide.add(i);S.revealed.clear();render();return}
+  if(a==='hideall'){S.hide=new Set([0,1,2,3,4,5,6]);S.revealed.clear();render();return}
+  if(a==='showall'){S.hide.clear();S.revealed.clear();render();return}
+  if(a==='reveal'){S.revealed.add(t.dataset.k);render();return}
+});
+document.addEventListener('submit',e=>{
+  const f=e.target.closest('[data-act="typed"]');if(!f)return;e.preventDefault();
+  const v=$('#nameInput').value;
+  if(S.tab==='fotos'){S.drill.typed=v;if(!norm(v))return;drillName(nameMatches(v,S.drill.cur))}
+  else{S.sim.a.typed=v;render()}
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='nameInput'&&S.tab==='sim'){S.sim.a.typed=e.target.value;
+    const b=$('[data-act="scheck"]');if(b){b.disabled=!(norm(e.target.value)&&S.sim.a.comp!==null&&S.sim.a.clase)}}
+});
+document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.d){d.open?OPEN.add(d.dataset.d):OPEN.delete(d.dataset.d)}},true);
+$('#lb').addEventListener('click',()=>$('#lb').classList.remove('on'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#lb').classList.remove('on')});
+render();
+</script>
+
+</body></html>
